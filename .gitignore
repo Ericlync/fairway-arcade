@@ -1,0 +1,19 @@
+# Local Python environments and generated files
+.venv/
+__pycache__/
+*.py[cod]
+
+# Godot editor/import cache
+godot/.godot/
+godot/export.cfg
+
+# macOS/editor noise
+.DS_Store
+.vscode/
+.idea/
+
+# Local screenshots and runtime logs
+*.log
+*.png
+*.jpg
+*.jpeg

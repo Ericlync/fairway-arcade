@@ -1,0 +1,1 @@
+"""Fairway Arcade game package."""
