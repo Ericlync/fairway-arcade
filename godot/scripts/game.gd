@@ -21,7 +21,9 @@ var _last_safe_position: Vector3
 var _water_penalty_pending := false
 var _reset_cooldown := 0.0
 var _aim_indicator: Node3D
+var _path_indicator: Node3D
 var _aim_degrees := 0.0
+var _swing_path_degrees := 0.0
 var _club_index := 0
 var _club: Dictionary = ClubData.get_club(0)
 
@@ -52,6 +54,8 @@ func _ready() -> void:
 
 	_aim_indicator = _create_aim_indicator()
 	add_child(_aim_indicator)
+	_path_indicator = _create_aim_indicator(Color(0.25, 0.85, 1.0), 4.0, 4.0)
+	add_child(_path_indicator)
 
 	_camera = GolfCamera.new()
 	_camera.name = "GolfCamera"
@@ -63,6 +67,7 @@ func _ready() -> void:
 	add_child(_swing)
 	_swing.aim_changed.connect(_on_aim_changed)
 	_swing.phase_changed.connect(_on_phase_changed)
+	_swing.swing_feedback.connect(_on_swing_feedback)
 	_swing.shot_calculated.connect(_on_shot_calculated)
 	_swing.set_club(_club)
 
@@ -117,7 +122,13 @@ func _on_phase_changed(description: String, power: float) -> void:
 	_hud.update_swing(description, power)
 
 
+func _on_swing_feedback(description: String, power: float, lateral_ratio: float) -> void:
+	_swing_path_degrees = clampf(lateral_ratio, -0.35, 0.35) * 30.0
+	_hud.update_swing(description, power, lateral_ratio)
+
+
 func _on_shot_calculated(shot: Dictionary) -> void:
+	_swing_path_degrees = 0.0
 	_ball.launch(shot)
 	_game.take_stroke()
 	_hud.show_shot(shot)
@@ -196,22 +207,22 @@ func _test_shot() -> void:
 	_on_shot_calculated(shot)
 
 
-func _create_aim_indicator() -> Node3D:
+func _create_aim_indicator(tint: Color = Color(0.95, 0.95, 0.15), shaft_length: float = 2.5, head_position: float = 2.5) -> Node3D:
 	var root := Node3D.new()
 	root.name = "AimIndicator"
 	var shaft := MeshInstance3D.new()
 	var shaft_mesh := CylinderMesh.new()
 	shaft_mesh.top_radius = 0.04
 	shaft_mesh.bottom_radius = 0.04
-	shaft_mesh.height = 2.5
+	shaft_mesh.height = shaft_length
 	shaft.mesh = shaft_mesh
-	shaft.position = Vector3(0.0, 0.02, 1.25)
+	shaft.position = Vector3(0.0, 0.02, shaft_length * 0.5)
 	shaft.rotation_degrees.x = 90.0
 	shaft.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.95, 0.95, 0.15)
+	mat.albedo_color = tint
 	mat.emission_enabled = true
-	mat.emission = Color(0.95, 0.95, 0.15)
+	mat.emission = tint
 	mat.emission_energy = 0.4
 	shaft.material_override = mat
 	root.add_child(shaft)
@@ -222,7 +233,7 @@ func _create_aim_indicator() -> Node3D:
 	head_mesh.bottom_radius = 0.18
 	head_mesh.height = 0.45
 	head.mesh = head_mesh
-	head.position = Vector3(0.0, 0.02, 2.5)
+	head.position = Vector3(0.0, 0.02, head_position)
 	head.rotation_degrees.x = 90.0
 	head.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	head.material_override = mat
@@ -234,9 +245,12 @@ func _update_aim_indicator(visible: bool) -> void:
 	if _aim_indicator == null or _ball == null:
 		return
 	_aim_indicator.visible = visible
+	_path_indicator.visible = visible and absf(_swing_path_degrees) > 0.5
 	if visible:
 		_aim_indicator.global_position = _ball.global_position + Vector3.UP * 0.05
 		_aim_indicator.global_rotation_degrees.y = -_aim_degrees
+		_path_indicator.global_position = _ball.global_position + Vector3.UP * 0.06
+		_path_indicator.global_rotation_degrees.y = -(_aim_degrees + _swing_path_degrees)
 
 
 func _setup_environment() -> void:

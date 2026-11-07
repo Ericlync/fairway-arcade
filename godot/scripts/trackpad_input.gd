@@ -4,12 +4,13 @@ class_name TrackpadInput
 
 signal aim_changed(degrees: float)
 signal phase_changed(description: String, power: float)
+signal swing_feedback(description: String, power: float, lateral_ratio: float)
 signal swing_released(sample: Dictionary)
 
 enum Phase { AIMING, BACKSWING, READY, FORWARD }
 
-@export_range(5.0, 60.0, 1.0) var aim_limit_degrees := 24.0
-@export var aim_speed_degrees := 42.0
+@export_range(45.0, 180.0, 1.0) var aim_limit_degrees := 180.0
+@export var aim_speed_degrees := 75.0
 @export var min_backswing_pixels := 14.0
 @export var min_forward_pixels := 8.0
 @export var power_backswing_divisor := 170.0
@@ -55,7 +56,7 @@ func _process(delta: float) -> void:
 	if Input.is_key_pressed(KEY_RIGHT):
 		direction += 1.0
 	if not is_zero_approx(direction):
-		aim_degrees = clampf(aim_degrees + direction * aim_speed_degrees * delta, -aim_limit_degrees, aim_limit_degrees)
+		aim_degrees = wrapf(aim_degrees + direction * aim_speed_degrees * delta, -aim_limit_degrees, aim_limit_degrees)
 		aim_changed.emit(aim_degrees)
 
 
@@ -69,6 +70,7 @@ func _begin_swing() -> void:
 	_last_sample_usec = Time.get_ticks_usec()
 	_phase = Phase.BACKSWING
 	phase_changed.emit("Backswing — drag down", 0.0)
+	swing_feedback.emit("Backswing — drag down", 0.0, 0.0)
 
 
 func _sample_drag(relative_motion: Vector2) -> void:
@@ -96,6 +98,7 @@ func _sample_drag(relative_motion: Vector2) -> void:
 			_forward_pixels += forward_delta
 			_lateral_pixels += relative_motion.x
 			phase_changed.emit("Swing — release to hit", _power_estimate())
+			swing_feedback.emit("Swing — release to hit", _power_estimate(), _lateral_pixels / maxf(_forward_pixels, 1.0))
 
 
 func _finish_swing() -> void:

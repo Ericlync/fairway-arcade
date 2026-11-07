@@ -9,6 +9,7 @@ var _strokes_label: Label
 var _lie_label: Label
 var _ball_state_label: Label
 var _shape_label: Label
+var _path_label: Label
 var _power_bar: ProgressBar
 var _aim_degrees := 0.0
 
@@ -57,6 +58,8 @@ func _build_ui() -> void:
 	rows.add_child(_power_bar)
 	_shape_label = _label("", 15, Color(0.95, 0.75, 0.45))
 	rows.add_child(_shape_label)
+	_path_label = _label("Club path: CENTER  •  Ball path: STRAIGHT", 15, Color(0.45, 0.88, 1.0))
+	rows.add_child(_path_label)
 	_ball_state_label = _label("Ball: SETTLED", 16, Color(0.55, 0.95, 0.62))
 	rows.add_child(_ball_state_label)
 	_status_label = _label("Aim ← → • club ↑ ↓ • drag down, flick up, release", 14, Color(0.93, 0.94, 0.88))
@@ -91,10 +94,11 @@ func set_aim_value(degrees: float) -> void:
 	_aim_label.text = "Aim: %+.1f°     Power: %d%%" % [_aim_degrees, roundi(_power_bar.value)]
 
 
-func update_swing(description: String, power: float) -> void:
+func update_swing(description: String, power: float, lateral_ratio: float = 0.0) -> void:
 	_status_label.text = description
 	_power_bar.value = clampf(power, 0.0, 1.0) * 100.0
 	_aim_label.text = "Aim: %+.1f°     Power: %d%%" % [_aim_degrees, roundi(_power_bar.value)]
+	update_path(lateral_ratio)
 
 
 func show_shot(shot: Dictionary) -> void:
@@ -106,10 +110,26 @@ func show_shot(shot: Dictionary) -> void:
 	_status_label.text = "%s away • %d%% accuracy" % [club_name, roundi(accuracy * 100.0)]
 	_aim_label.text = "Launch: %+.1f°     Power: %d%%" % [direction, roundi(power * 100.0)]
 	_shape_label.text = _shape_text(shot)
+	_path_label.text = "Club path: %+.1f°  •  Ball path: %s" % [float(shot.get("path_degrees", 0.0)), _shape_text(shot)]
 
 
 func show_message(text: String) -> void:
 	_status_label.text = text
+
+
+func update_path(lateral_ratio: float) -> void:
+	var path_degrees := clampf(lateral_ratio, -0.35, 0.35) * 30.0
+	var path_name := "CENTER"
+	if path_degrees > 1.0:
+		path_name = "RIGHT / PUSH"
+	elif path_degrees < -1.0:
+		path_name = "LEFT / PULL"
+	var ball_name := "STRAIGHT"
+	if path_degrees > 1.0:
+		ball_name = "HOOK / DRAW"
+	elif path_degrees < -1.0:
+		ball_name = "SLICE / FADE"
+	_path_label.text = "Club path: %s  •  Ball path: %s" % [path_name, ball_name]
 
 
 func _shape_text(shot: Dictionary) -> String:

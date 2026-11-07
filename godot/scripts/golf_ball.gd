@@ -23,6 +23,8 @@ var _surface_type := "fairway"
 var _motion_state := MotionState.SETTLED
 var _settled_timer := 0.0
 var _has_landed := false
+var _shot_roll_resistance := 1.0
+var _shot_bounce := -1.0
 
 
 func _init() -> void:
@@ -128,7 +130,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 	var ground_normal := _ground_normal()
 	var normal_velocity := state.linear_velocity.dot(ground_normal)
 	var grounded := state.get_contact_count() > 0 or (distance_to_ground <= BALL_RADIUS + 0.10 and normal_velocity <= 0.8)
-	var bounced := physics.integrate(self, state, state.step, _surface_type, grounded, ground_normal)
+	var bounced := physics.integrate(self, state, state.step, _surface_type, grounded, ground_normal, _shot_roll_resistance, _shot_bounce)
 
 	if grounded and not bounced:
 		var target_y := terrain_height + BALL_RADIUS
@@ -169,6 +171,8 @@ func launch(shot: Dictionary) -> void:
 	var velocity: Vector3 = shot.get("velocity", Vector3.ZERO)
 	var backspin: float = shot.get("backspin_rpm", 2400.0)
 	var sidespin: float = shot.get("sidespin_rpm", 0.0)
+	_shot_roll_resistance = float(shot.get("roll_resistance", 1.0))
+	_shot_bounce = float(shot.get("bounce_restitution", -1.0))
 	physics.launch(self, velocity, backspin, sidespin)
 	_settled_timer = 0.0
 	_has_landed = false
@@ -181,6 +185,8 @@ func reset_at(position: Vector3) -> void:
 	angular_velocity = Vector3.ZERO
 	_settled_timer = 0.0
 	_has_landed = false
+	_shot_roll_resistance = 1.0
+	_shot_bounce = -1.0
 	_set_motion_state(MotionState.SETTLED)
 	sleeping = true
 

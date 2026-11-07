@@ -39,7 +39,7 @@ func configure_ball(ball: RigidBody3D) -> void:
 	ball.physics_material_override.bounce = 0.0
 
 
-func integrate(ball: RigidBody3D, state: PhysicsDirectBodyState3D, delta: float, surface_type: String, grounded: bool, ground_normal: Vector3) -> bool:
+func integrate(ball: RigidBody3D, state: PhysicsDirectBodyState3D, delta: float, surface_type: String, grounded: bool, ground_normal: Vector3, roll_resistance_multiplier: float = 1.0, shot_bounce: float = -1.0) -> bool:
 	var gravity := Vector3.DOWN * 9.81 * gravity_scale
 	var v := state.linear_velocity
 	var normal := ground_normal.normalized() if ground_normal.length_squared() > 0.01 else Vector3.UP
@@ -56,8 +56,9 @@ func integrate(ball: RigidBody3D, state: PhysicsDirectBodyState3D, delta: float,
 
 	var normal_speed := v.dot(normal)
 	var bounced := false
+	var restitution := bounce_restitution if shot_bounce < 0.0 else shot_bounce
 	if normal_speed < -0.45:
-		var bounce_speed := -normal_speed * bounce_restitution
+		var bounce_speed := -normal_speed * restitution
 		v += normal * (-normal_speed + bounce_speed)
 		bounced = bounce_speed > 1.0
 	else:
@@ -66,7 +67,7 @@ func integrate(ball: RigidBody3D, state: PhysicsDirectBodyState3D, delta: float,
 	var tangent := v - normal * v.dot(normal)
 	var slope_gravity := gravity - normal * gravity.dot(normal)
 	tangent += slope_gravity * delta
-	var rolling_resistance := _friction_for_surface(surface_type)
+	var rolling_resistance := _friction_for_surface(surface_type) * maxf(roll_resistance_multiplier, 0.1)
 	tangent *= exp(-rolling_resistance * delta)
 	# Static friction: a very slow ball on a shallow slope should stop instead
 	# of endlessly creeping due to tiny heightfield normal changes.

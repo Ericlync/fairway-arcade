@@ -23,6 +23,8 @@ static func calculate(sample: Dictionary) -> Dictionary:
 
 	var launch_angle := deg_to_rad(lerpf(float(club.get("min_angle", 13.0)), float(club.get("max_angle", 29.0)), power))
 	var speed := lerpf(float(club.get("min_speed", 16.0)), float(club.get("max_speed", 46.0)), power) * lerpf(0.82, 1.0, accuracy)
+	if club.get("category", "wood") == "putter":
+		launch_angle = 0.0
 
 	var horizontal_direction := Vector3(sin(launch_direction), 0.0, -cos(launch_direction))
 	var velocity := horizontal_direction * speed * cos(launch_angle)
@@ -33,8 +35,11 @@ static func calculate(sample: Dictionary) -> Dictionary:
 		"power": power,
 		"accuracy": accuracy,
 		"launch_direction_degrees": launch_direction_degrees,
+		"path_degrees": clampf(lateral_ratio, -0.35, 0.35) * 30.0,
 		"sidespin_rpm": sidespin_rpm,
 		"backspin_rpm": backspin_rpm,
 		"club_name": club.get("name", "Driver"),
 		"club_category": club.get("category", "wood"),
+		"roll_resistance": club.get("roll_resistance", 1.0),
+		"bounce_restitution": club.get("bounce", 0.2),
 	}

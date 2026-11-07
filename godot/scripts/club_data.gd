@@ -13,6 +13,8 @@ const CLUBS := [
 		"max_angle": 29.0,
 		"backspin": 2200.0,
 		"backspin_power": 1800.0,
+		"roll_resistance": 0.90,
+		"bounce": 0.20,
 	},
 	{
 		"name": "3-Wood",
@@ -24,6 +26,8 @@ const CLUBS := [
 		"max_angle": 27.0,
 		"backspin": 2500.0,
 		"backspin_power": 1600.0,
+		"roll_resistance": 1.00,
+		"bounce": 0.19,
 	},
 	{
 		"name": "5-Iron",
@@ -35,6 +39,8 @@ const CLUBS := [
 		"max_angle": 38.0,
 		"backspin": 3300.0,
 		"backspin_power": 1700.0,
+		"roll_resistance": 1.18,
+		"bounce": 0.16,
 	},
 	{
 		"name": "7-Iron",
@@ -46,6 +52,8 @@ const CLUBS := [
 		"max_angle": 44.0,
 		"backspin": 3900.0,
 		"backspin_power": 1600.0,
+		"roll_resistance": 1.28,
+		"bounce": 0.14,
 	},
 	{
 		"name": "Wedge",
@@ -57,17 +65,21 @@ const CLUBS := [
 		"max_angle": 58.0,
 		"backspin": 5000.0,
 		"backspin_power": 1800.0,
+		"roll_resistance": 1.65,
+		"bounce": 0.10,
 	},
 	{
 		"name": "Putter",
 		"short_name": "PT",
 		"category": "putter",
-		"min_speed": 3.0,
-		"max_speed": 12.0,
+		"min_speed": 2.0,
+		"max_speed": 9.0,
 		"min_angle": 2.0,
 		"max_angle": 5.0,
 		"backspin": 0.0,
 		"backspin_power": 0.0,
+		"roll_resistance": 0.72,
+		"bounce": 0.0,
 	},
 ]
 

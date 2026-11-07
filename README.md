@@ -48,18 +48,21 @@ water hazard, trees, cup, flagstick, and boundary walls. The terrain visual mesh
 shares its height data with a `HeightMapShape3D` collider, so the ball rolls over
 slopes instead of a flat plane.
 
-The visible golf ball can be aimed with the **left/right arrow keys**, launched
-with the trackpad swing, and followed by an elevated arcade camera. Camera
-states cover aiming, swing, flight follow, and resting after the ball settles.
+The visible golf ball can be aimed through a full **360° orbit** with the
+left/right arrow keys, launched with the trackpad swing, and followed by an
+elevated arcade camera. Camera states cover aiming, swing, flight follow, and
+resting after the ball settles.
 The HUD displays hole, par, strokes, distance to cup, lie, aim, power, shot
 shape, and explicit airborne/bounce/settled feedback.
 
-Use the left/right arrow keys to aim smoothly. Hold the left trackpad click,
+Use the left/right arrow keys to aim smoothly around the entire ball. Hold the
+left trackpad click,
 drag down for a backswing, flick up, then release to hit. The trackpad now
 controls only backswing power, forward swing speed, acceleration, and lateral
-swing-path deviation; lateral deviation still produces intentional pull/push
-and hook/slice behavior. These pointer measurements are affected by macOS
-acceleration and will need calibration on the actual device.
+swing-path deviation. A live power gauge, club-path line, and predicted ball
+path show the result before release; lateral deviation still produces
+intentional pull/push and hook/slice behavior. These pointer measurements are
+affected by macOS acceleration and will need calibration on the actual device.
 
 Use **↑ / ↓** or **1–6** to select Driver, 3-Wood, 5-Iron, 7-Iron, Wedge, or
 Putter. Club selection changes launch angle, speed, spin, and shot distance.
@@ -82,6 +85,7 @@ godot/
     golf_ball.gd         # Rigid-body ball, surface detection, and visuals
     golf_ball_physics.gd # Configurable flight/ground physics
     golf_camera.gd       # Arcade camera states and interpolation
+    club_data.gd         # Driver, woods, irons, wedge, and putter profiles
     trackpad_input.gd    # Raw pointer swing sampling
     golf_swing_controller.gd # Combines input with shot calculation
     shot_calculator.gd   # Launch direction, power, and spin
@@ -103,8 +107,9 @@ runtime dependency is required for this first playable scene.
 1. **Godot project and window** — done.
 2. **Milestone 1: 3D conversion** — done. Real heightfield terrain, 3D ball,
    elevated arcade camera, aim indicator, and trackpad swing in `scenes/game.tscn`.
-3. **Milestone 2: Golf physics** — tune flight, bounce, roll, and terrain
-   friction; verify surface-specific behavior (fairway, rough, bunker, green).
+3. **Milestone 2: Golf physics** — in progress. Club-specific launch and roll
+   resistance, controlled bounce, slope rolling, and static-friction stopping
+   are implemented; continue tuning against real-device feel.
 4. **Milestone 3: Advanced swing mechanics** — refine pull/push/hook/slice
    mapping, face-to-path relationships, and on-device calibration.
 5. **Milestone 4: Course and assets** — improve terrain materials, textures,
